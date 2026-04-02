@@ -1,6 +1,6 @@
 {
   "engines": {
-    "node": "18.20.8"
+    "node": "24.14.1"
   },
   "name": "airbnb",
   "version": "1.0.0",
@@ -14,6 +14,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "24": "^0.0.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^1.30.0",
     "connect-flash": "^0.1.1",
@@ -29,6 +30,7 @@
     "mongoose": "^9.3.3",
     "multer": "^2.1.1",
     "multer-storage-cloudinary": "^4.0.0",
+    "node": "^25.9.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^9.0.1"
