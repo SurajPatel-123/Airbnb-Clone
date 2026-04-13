@@ -1,26 +1,43 @@
-const express=require("express");
-const router=express.Router();
+const express = require("express");
+const router = express.Router();
+
 const wrapAsync = require("../utils/wrapAsync.js");
-const {isLoggedIn,isOwner,validateListing}=require("../utils/middleware.js")
-const listingcontroller=require("../controller/listing.js");
+const { isLoggedIn, isOwner, validateListing } = require("../utils/middleware.js");
+const listingController = require("../controller/listing.js");
+
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
-const cloudinary = require("../cloudConfig");
 
-router.route("/")
-.get( wrapAsync(listingcontroller.index))
-.post( isLoggedIn, upload.single('listing[image]'),validateListing, wrapAsync(listingcontroller.createListing))
+// ================= ROUTES =================
 
-//New Route 
-router.get("/new", isLoggedIn,listingcontroller.renderNewForm)
+// INDEX + CREATE
+router
+  .route("/")
+  .get(wrapAsync(listingController.index))
+  .post(
+    isLoggedIn,
+    upload.single("listing[image]"),
+    validateListing,
+    wrapAsync(listingController.createListing)
+  );
 
-router.route("/:id")
-.get( wrapAsync(listingcontroller.showListing))
-.put(isLoggedIn, isOwner,upload.single("listing[image]"),validateListing, wrapAsync(listingcontroller.updateListing))
-.delete( isLoggedIn,wrapAsync(listingcontroller.deleteListing));
+// NEW FORM
+router.get("/new", isLoggedIn, listingController.renderNewForm);
 
+// SHOW + UPDATE + DELETE
+router
+  .route("/:id")
+  .get(wrapAsync(listingController.showListing))
+  .put(
+    isLoggedIn,
+    isOwner,
+    upload.single("listing[image]"),
+    validateListing,
+    wrapAsync(listingController.updateListing)
+  )
+  .delete(isLoggedIn, isOwner, wrapAsync(listingController.deleteListing));
 
+// EDIT FORM
+router.get("/:id/edit", isLoggedIn, isOwner, wrapAsync(listingController.renderEditForm));
 
-//Edit Route
-router.get("/:id/edit", wrapAsync(listingcontroller.editListing));
-module.exports=router;
+module.exports = router;

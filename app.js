@@ -117,16 +117,14 @@ app.use("/listings", listingsRouter);
 app.use("/listings/:id/reviews", reviewsRouter);
 app.use("/", userRouter);
 
-// ================= HOME ROUTE FIX =================
-// ❌ REMOVE REDIRECT LOOP BUG
+// ================= HOME ROUTE =================
 app.get("/", (req, res) => {
     res.redirect("/listings");
 });
 
-// ================= 404 ERROR HANDLER (IMPORTANT FIX) =================
-// ❌ DO NOT USE "*" or "/*"
-app.use((req, res) => {
-    res.status(404).send("Page not found");
+// ================= 404 ROUTE (IMPORTANT) =================
+app.all("*", (req, res, next) => {
+    next(new ExpressError(404, "Page Not Found"));
 });
 
 // ================= ERROR HANDLER =================
