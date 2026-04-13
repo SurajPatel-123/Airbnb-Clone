@@ -126,7 +126,7 @@ app.use((req, res, next) => {
 // ================= ROUTES =================
 
 // 🔥 HOME ROUTE (MOST IMPORTANT FIX)
-app.get("/", (req, res) => {
+app.get("/listings", (req, res) => {
     res.redirect("/listings");
 });
 

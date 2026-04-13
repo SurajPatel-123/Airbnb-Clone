@@ -26,6 +26,7 @@
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "express-sessions": "^1.0.1",
+    "flash": "^1.1.0",
     "joi": "^18.0.2",
     "method-override": "^3.0.0",
     "mongoose": "^9.3.3",
