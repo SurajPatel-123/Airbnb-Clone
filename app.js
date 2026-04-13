@@ -60,9 +60,7 @@ const store = MongoStore.create({
 store.on("error", (err) => {
     console.log("❌ SESSION STORE ERROR:", err);
 });
-
 const sessionOptions = {
-    store,
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false,
@@ -70,7 +68,7 @@ const sessionOptions = {
         expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // 🔥 important
+        secure: process.env.NODE_ENV === "production",
     },
 };
 
