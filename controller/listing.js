@@ -1,5 +1,5 @@
 const Listing = require("../models/listing");
-const cloudinary = require("../config/cloudinary"); // ensure this exists
+const cloudinary = require("../cloudConfig"); // ensure this exists
 
 // ================= INDEX =================
 module.exports.index = async (req, res) => {
