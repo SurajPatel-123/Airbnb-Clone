@@ -28,15 +28,9 @@ const bcrypt = require("bcryptjs");
 // ================= DB CONNECT =================
 const dbUrl = process.env.ATLASDB_URL;
 
-async function main() {
-    try {
-        await mongoose.connect(dbUrl);
-        console.log("✅ Connected to DB");
-    } catch (err) {
-        console.log("❌ DB Connection Error:", err);
-    }
-}
-main();
+mongoose.connect(dbUrl)
+    .then(() => console.log("✅ Connected to DB"))
+    .catch((err) => console.log("❌ DB Error:", err));
 
 // ================= VIEW ENGINE =================
 app.set("view engine", "ejs");
@@ -46,7 +40,7 @@ app.engine("ejs", ejsMate);
 // ================= MIDDLEWARE =================
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
-app.use(express.static(path.join(__dirname, "/public")));
+app.use(express.static(path.join(__dirname, "public")));
 
 // ================= SESSION STORE =================
 const store = MongoStore.create({
@@ -62,7 +56,7 @@ store.on("error", (err) => {
 });
 
 const sessionOptions = {
-    store, // 🔥 IMPORTANT FIX
+    store,
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false,
@@ -81,20 +75,15 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 passport.use(new LocalStrategy(async (username, password, done) => {
     try {
         const user = await User.findOne({ username });
 
-        if (!user) {
-            return done(null, false, { message: "User not found" });
-        }
+        if (!user) return done(null, false, { message: "User not found" });
 
         const isMatch = await bcrypt.compare(password, user.password);
 
-        if (!isMatch) {
-            return done(null, false, { message: "Incorrect password" });
-        }
+        if (!isMatch) return done(null, false, { message: "Incorrect password" });
 
         return done(null, user);
     } catch (err) {
@@ -124,26 +113,29 @@ app.use((req, res, next) => {
 });
 
 // ================= ROUTES =================
-
-// 🔥 HOME ROUTE (MOST IMPORTANT FIX)
-app.get("/listings", (req, res) => {
-    res.redirect("/listings");
-});
-
 app.use("/listings", listingsRouter);
 app.use("/listings/:id/reviews", reviewsRouter);
 app.use("/", userRouter);
 
-// ================= ERROR HANDLER =================
-app.all("/*", (req, res) => {
-    res.send("Page not found");
+// ================= HOME ROUTE FIX =================
+// ❌ REMOVE REDIRECT LOOP BUG
+app.get("/", (req, res) => {
+    res.redirect("/listings");
 });
+
+// ================= 404 ERROR HANDLER (IMPORTANT FIX) =================
+// ❌ DO NOT USE "*" or "/*"
+app.use((req, res) => {
+    res.status(404).send("Page not found");
+});
+
+// ================= ERROR HANDLER =================
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "Something went wrong!" } = err;
     res.status(statusCode).render("error.ejs", { message });
 });
 
-// ================= SERVER START =================
+// ================= SERVER =================
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
