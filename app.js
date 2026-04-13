@@ -8,8 +8,11 @@ const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+
 const listingsRouter = require("./routes/listing.js");
 const reviewsRouter = require("./routes/review.js");
+const userRouter = require("./routes/user.js");
+
 const ExpressError = require("./utils/ExpressError.js");
 
 const session = require("express-session");
@@ -20,18 +23,20 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 
 const User = require("./models/user");
-const bcrypt = require("bcryptjs"); // ✅ already correct
-
-const userRouter = require("./routes/user.js");
-
-const dbUrl = process.env.ATLASDB_URL;
+const bcrypt = require("bcryptjs");
 
 // ================= DB CONNECT =================
+const dbUrl = process.env.ATLASDB_URL;
+
 async function main() {
-    await mongoose.connect(dbUrl);
-    console.log("✅ connected to DB");
+    try {
+        await mongoose.connect(dbUrl);
+        console.log("✅ Connected to DB");
+    } catch (err) {
+        console.log("❌ DB Connection Error:", err);
+    }
 }
-main().catch(err => console.log(err));
+main();
 
 // ================= VIEW ENGINE =================
 app.set("view engine", "ejs");
@@ -52,20 +57,21 @@ const store = MongoStore.create({
     touchAfter: 24 * 3600,
 });
 
-store.on("error", (err) => {   // ✅ FIXED (err missing tha)
-    console.log("❌ Mongo session error:", err);
+store.on("error", (err) => {
+    console.log("❌ SESSION STORE ERROR:", err);
 });
 
 const sessionOptions = {
     store,
     secret: process.env.SECRET,
     resave: false,
-    saveUninitialized: false,  // ✅ better practice
+    saveUninitialized: false,
     cookie: {
         expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-    }
+        secure: process.env.NODE_ENV === "production", // 🔥 important
+    },
 };
 
 app.use(session(sessionOptions));
@@ -127,9 +133,9 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render("error.ejs", { message });
 });
 
-// ================= PORT (VERY IMPORTANT FOR VERCEL) =================
+// ================= SERVER START (MOST IMPORTANT) =================
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
-    console.log(`🚀 server running on port ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
