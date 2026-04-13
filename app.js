@@ -135,10 +135,9 @@ app.use("/listings/:id/reviews", reviewsRouter);
 app.use("/", userRouter);
 
 // ================= ERROR HANDLER =================
-app.all("*", (req, res, next) => {
-    next(new ExpressError(404, "Page Not Found"));
+app.all("/*", (req, res) => {
+    res.send("Page not found");
 });
-
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "Something went wrong!" } = err;
     res.status(statusCode).render("error.ejs", { message });
