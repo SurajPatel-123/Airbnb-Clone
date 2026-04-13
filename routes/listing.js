@@ -3,9 +3,9 @@ const router=express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
 const {isLoggedIn,isOwner,validateListing}=require("../utils/middleware.js")
 const listingcontroller=require("../controller/listing.js");
-const multer=require('multer');
-const {storage}=require("../cloudConfig.js");
-const upload =multer({storage});
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
+const cloudinary = require("../cloudConfig");
 
 router.route("/")
 .get( wrapAsync(listingcontroller.index))
