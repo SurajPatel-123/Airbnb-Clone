@@ -3,23 +3,29 @@ const User = require("../models/user");
 module.exports.renderSignup = (req, res) => {
     res.render("users/signup.ejs");
 };
-module.exports.SignUp = async (req, res) => {
+const bcrypt = require("bcryptjs");
+
+module.exports.SignUp = async (req, res, next) => {
     try {
         let { username, email, password } = req.body;
+
+        const hashedPassword = await bcrypt.hash(password, 12); // 🔥 fix
+
         const newUser = new User({
             email,
             username,
-            password   // ✅ plain password
+            password: hashedPassword
         });
+
         const savedUser = await newUser.save();
-        console.log(savedUser);
+
         req.login(savedUser, (err) => {
-            if (err) {
-                return next(err);
-            }
+            if (err) return next(err);
+
             req.flash("success", "Welcome to Wanderlust!");
             res.redirect("/listings");
-        })
+        });
+
     } catch (e) {
         req.flash("error", e.message);
         res.redirect("/signup");

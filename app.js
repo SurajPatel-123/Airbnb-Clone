@@ -60,7 +60,9 @@ const store = MongoStore.create({
 store.on("error", (err) => {
     console.log("❌ SESSION STORE ERROR:", err);
 });
+
 const sessionOptions = {
+    store, // 🔥 IMPORTANT FIX
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false,
@@ -78,6 +80,7 @@ app.use(flash());
 // ================= PASSPORT =================
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 passport.use(new LocalStrategy(async (username, password, done) => {
     try {
@@ -121,20 +124,27 @@ app.use((req, res, next) => {
 });
 
 // ================= ROUTES =================
+
+// 🔥 HOME ROUTE (MOST IMPORTANT FIX)
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
+
 app.use("/listings", listingsRouter);
 app.use("/listings/:id/reviews", reviewsRouter);
 app.use("/", userRouter);
 
-app.get("/", (req, res) => {
-    res.redirect("/listings");
-});
 // ================= ERROR HANDLER =================
+app.all("*", (req, res, next) => {
+    next(new ExpressError(404, "Page Not Found"));
+});
+
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "Something went wrong!" } = err;
     res.status(statusCode).render("error.ejs", { message });
 });
 
-// ================= SERVER START (MOST IMPORTANT) =================
+// ================= SERVER START =================
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {

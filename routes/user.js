@@ -11,11 +11,16 @@ router.route("/signup")
 
 router.route("/login")
 .get(userController.renderLogin)
-.post(saveRedirectUrl,
+
+router.post("/login", saveRedirectUrl, (req, res, next) => {
+    console.log("LOGIN HIT"); // 👈
+    next();
+}, saveRedirectUrl,
 passport.authenticate("local", {
     failureRedirect: '/login',
     failureFlash: true,
-}),userController.login
+}),
+userController.login
 );
 
 router.get("/logout",userController.logout)
